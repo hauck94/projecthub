@@ -1,0 +1,72 @@
+version: '3.7'
+services:
+
+  rproxy:
+    image: nginx:1.17.10-alpine
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - ${APPLICATION_PORT}:80
+    links:
+      - backend:backend
+      - frontend:frontend
+
+  frontend:
+    image: registry.code.fbi.h-da.de/project-hub/project-hub/frontend
+    restart: always
+
+  backend:
+    image: registry.code.fbi.h-da.de/project-hub/project-hub/backend
+    depends_on:
+      - db
+    ports:
+      - '4000:80'
+    restart: unless-stopped
+    environment:
+      - DBHOST=db
+      - DBPORT=3306
+      - DBUSER=root
+      - DBPASSWORD=123456789
+      - DBDATABASE=project_hub
+
+  notes:
+    depends_on:
+      - db
+    image: registry.code.fbi.h-da.de/project-hub/project-hub/notes
+    ports:
+      - 3001:9001
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=project_hub_etherpad
+      - DB_USER=etherpad
+      - DB_PWD=etherpadPWD
+
+  db:
+    image: mysql:5.7
+    restart: unless-stopped
+    tty: true
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456789
+      - MYSQL_DATABASE=project_hub
+      - MYSQL_USER=ha1-user
+      - MYSQL_PASSWORD=123456789
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --init-file=/data/application/init.sql
+    volumes:
+      - ./config/db/init.sql:/data/application/init.sql
+      - dbdata:/var/lib/mysql/
+
+      
+
+volumes:
+  dbdata:
+    driver: local

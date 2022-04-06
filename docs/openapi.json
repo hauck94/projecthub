@@ -1,0 +1,1476 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Project-Hub",
+    "description": "API Specification for Project-Hub",
+    "license": {
+      "name": "MIT Licence",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "tags": [
+    {
+      "name": "users",
+      "description": "Available functions for interacting with users."
+    },
+    {
+      "name": "projects",
+      "description": "Available functions for interacting with projects."
+    },
+    {
+      "name": "widgets",
+      "description": "Available functions for interacting with widgets."
+    },
+    {
+      "name": "widget templates",
+      "description": "Available functions for interaction with widget templates. These endpoints can be set individually by the widgets."
+    }
+  ],
+  "paths": {
+    "/users/login": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "description": "Login endpoint",
+        "operationId": "loginUser",
+        "requestBody": {
+          "description": "new user",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "token"
+                  ],
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Wrong username or password"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "description": "Create / register new user.\n",
+        "operationId": "addNewUser",
+        "requestBody": {
+          "description": "new user",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WriteUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "User successfully added"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "403": {
+            "description": "Forbidden. User already exists."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "description": "Returns all users.\n",
+        "operationId": "returnAllUsers",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "username"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "picture": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "description": "Returns a single user based on the supplied id.\n",
+        "operationId": "findUserById",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of user to fetch",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function."
+          },
+          "404": {
+            "description": "No user available, that matches the specified ID."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "description": "Updates a single user based on the supplied id.  \nThe supplied id has to be equal the id inside the JWT Token to access this request.  \n",
+        "operationId": "updateUserById",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of user to update",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "updated user",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WriteUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "user successfully updated"
+          },
+          "400": {
+            "description": "malformed request"
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "description": "Deletes a single user based on the supplied id.  \nThe supplied id has to be equal the id inside the JWT Token to access this request.  \nThis call trigers a chain of events\n- delete the specefied user\n- remove the user from all projects he was part of\n- delete all projects where the user was the only member\n",
+        "operationId": "deleteUser",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of user to delete",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "user successfully deleted"
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/projects": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Return a list of all projects the user has access to.\n",
+        "operationId": "returnProjects",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of projects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "public",
+                      "active"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "public": {
+                        "type": "boolean"
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "picture": {
+                        "type": "string"
+                      },
+                      "labels": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "members": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "username",
+                            "permission",
+                            "status"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "username": {
+                              "type": "string"
+                            },
+                            "picture": {
+                              "type": "string"
+                            },
+                            "permission": {
+                              "type": "boolean"
+                            },
+                            "status": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Create a new project",
+        "operationId": "addNewProject",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "requestBody": {
+          "description": "new user",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WriteProject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Project successfully added"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/projects/{id}": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Return a single project based on the specefied id.  \nThe interacting user can only use IDs of projects he is part of.\n",
+        "operationId": "findProjectById",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of project to fetch",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "requested project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Edit the specified project.  \nThe interacting user can only use IDs of projects he is part of.  \nThis endpoint only executes if the interacting user has \"write\" permissions on the project.  \n",
+        "operationId": "editProject",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of project to fetch",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "updated project",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WriteProject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "project successfully updated"
+          },
+          "400": {
+            "description": "malformed request"
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Deletes a single project based on the supplied id.  \nThe interacting user can only use IDs of projects he is part of.  \nThis endpoint only executes if the interacting user has \"write\" permissions on the project.  \nThis call trigers a chain of events\n- Delete the specefied project.\n- Remove all dependencies to users who had access to this project.\n",
+        "operationId": "deleteProject",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of Project to delete",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "project successfully deleted"
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/projects/{id}/widgets": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Returns all widgets that are part of the specified project.  \nThe interacting user can only use IDs of projects he is part of.\n",
+        "operationId": "returnAllWidgets",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "project ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of widgets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Widget"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Update widget-list in project.  \nThe interacting user can only use IDs of projects he is part of.  \nThis endpoint only executes if the interacting user has \"write\" permissions on the project. \n",
+        "operationId": "updateWidgetList",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "project ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "list of widgets",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Widget"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "widget list successfully updated"
+          },
+          "400": {
+            "description": "malformed request"
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/projects/{id}/members": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Returns all members that are part of the specified project.  \nThe interacting user can only use IDs of projects he is part of.\n",
+        "operationId": "returnAllMembers",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "project ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "list of members",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicUser"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Add new member to the specified project.  \nThe interacting user can only use IDs of projects he is part of.  \nThis endpoint only executes if the interacting user has \"write\" permissions on the project.  \n",
+        "operationId": "addNewMember",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "project ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "new member",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "User successfully added to project."
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/projects/{projectId}/members/{userId}": {
+      "patch": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Edit a project member of the specified project.\nThe interacting user can only use IDs of projects he is part of.\nThis endpoint only executes if the interacting user has \"write\" permissions on the project.  \n",
+        "operationId": "editMember",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "project ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "user ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "updated member",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "permission": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Project member successfully updated."
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function."
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "projects"
+        ],
+        "description": "Removes a specefied member the selected project.  \nThe interacting user can only use IDs of projects he is part of.  \nThis endpoint only executes if the interacting user has \"write\" permissions on the project.  \n",
+        "operationId": "removeMember",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "project ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "user ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Member successfully removed from project."
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/widgets/{id}": {
+      "get": {
+        "tags": [
+          "widgets"
+        ],
+        "description": "Returns a widget based on the supplied ID.  \nThe interacting user can only use IDs of widgets that belong to projects he is part of.  \n",
+        "operationId": "findWidgetByID",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of widget to fetch",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "widget response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Widget"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "widgets"
+        ],
+        "description": "Edit a existing widget based on the supplied ID.  \nThe interacting user can only use IDs of widgets that belong to projects he is part of.  \nThis endpoint only executes if the interacting user has \"write\" permissions on the project this widget belongs to.  \n",
+        "operationId": "updateWidgetById",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of widget to update",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "updated widget",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWidget"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "widget successfully updated"
+          },
+          "400": {
+            "description": "malformed request"
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function."
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "404": {
+            "description": "No Event available, that matches the specified ID."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "widgets"
+        ],
+        "description": "Delete a existing widget based on the supplied ID.  \nThe interacting user can only use IDs of widgets that belong to projects he is part of.  \nThis endpoint only executes if the interacting user has \"write\" permissions on the project this widget belongs to. \n",
+        "operationId": "deleteWidget",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of widget to delete",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Widget successfully deleted."
+          },
+          "401": {
+            "description": "Unauthorized. Please log-in to access this API-function"
+          },
+          "403": {
+            "description": "Forbidden. Not enough permissions!"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/wt/{type}/...": {
+      "get": {
+        "tags": [
+          "widget templates"
+        ],
+        "description": "This route can be custom implemented by the widget",
+        "operationId": "wtCustomGet",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "type of widget",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "custom response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "widget templates"
+        ],
+        "description": "This route can be custom implemented by the widget",
+        "operationId": "wtCustomPost",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "type of widget",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "custom response"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "widget templates"
+        ],
+        "description": "This route can be custom implemented by the widget",
+        "operationId": "wtCustomPut",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "type of widget",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "custom response"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "widget templates"
+        ],
+        "description": "This route can be custom implemented by the widget",
+        "operationId": "wtCustomPatch",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "type of widget",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "custom response"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "widget templates"
+        ],
+        "description": "This route can be custom implemented by the widget",
+        "operationId": "wtCustomDelete",
+        "security": [
+          {
+            "user_auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "type of widget",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "custom response"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "entryDate": {
+            "type": "string"
+          },
+          "jobTitle": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          }
+        }
+      },
+      "WriteUser": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "email",
+              "username",
+              "password"
+            ],
+            "properties": {
+              "email": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/Profile"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "settings": {
+                "type": "object"
+              }
+            }
+          }
+        ]
+      },
+      "PublicUser": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "username",
+              "email"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/Profile"
+          }
+        ]
+      },
+      "User": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "username",
+              "email"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/Profile"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "settings": {
+                "type": "object"
+              }
+            }
+          }
+        ]
+      },
+      "WriteProject": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "backgroundColor": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "permission": {
+                  "type": "boolean"
+                }
+              },
+              "description": "IDs of users that should be added"
+            }
+          },
+          "widgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Widget"
+            }
+          }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "required": [
+          "id",
+          "active",
+          "public",
+          "members"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "backgroundColor": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "username",
+                "email",
+                "permission"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "picture": {
+                  "type": "string"
+                },
+                "permission": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "widgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Widget"
+            }
+          }
+        }
+      },
+      "UpdateWidget": {
+        "type": "object",
+        "required": [
+          "xPos",
+          "yPos",
+          "height",
+          "width",
+          "data"
+        ],
+        "properties": {
+          "xPos": {
+            "type": "number"
+          },
+          "yPos": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      },
+      "Widget": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "type"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/UpdateWidget"
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "user_auth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

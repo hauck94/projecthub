@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+ 
+resources:
+  - project-hub-config.yaml
+  - project-hub-db.yaml
+  - project-hub-backend.yaml
+  - project-hub-frontend.yaml
+  - project-hub-notes.yaml
+  - project-hub-ingress.yaml

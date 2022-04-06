@@ -1,0 +1,26 @@
+entity: User
+items:
+  Usr1:
+    name: 'User 1'
+    email: 'test1@live.com'
+    password: '$2y$12$kLnoTXNvwsXws4N3RcseWuGTaTevDb9hriEEqjIlSutqTfirFv.92' #"test123"
+    status: 'teststatus'
+    picture: 'tmpPic'
+  Usr2:
+    name: 'User 2'
+    email: 'test2@live.com'
+    password: '$2y$12$kLnoTXNvwsXws4N3RcseWuGTaTevDb9hriEEqjIlSutqTfirFv.92' #"test123"
+    status: 'teststatus'
+    picture: 'tmpPic'
+  Usr3:
+    name: 'Ilir 3'
+    email: 'ilir@ilir3.com'
+    password: '$2y$12$kLnoTXNvwsXws4N3RcseWuGTaTevDb9hriEEqjIlSutqTfirFv.92' #"test123"
+    status: 'teststatus'
+    picture: 'tmpPic'
+  Usr4:
+    name: 'Tobi'
+    email: 'tobi2@tobi2'
+    password: '$2y$12$kLnoTXNvwsXws4N3RcseWuGTaTevDb9hriEEqjIlSutqTfirFv.92' #"test123"
+    status: 'teststatus'
+    picture: 'tmpPic'

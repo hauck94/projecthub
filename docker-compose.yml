@@ -1,0 +1,58 @@
+version: '3.7'
+services:
+  frontend:
+    image: node:13
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    working_dir: /var/app/frontend
+    ports:
+      - 3000:3000
+    command: npm start
+    stdin_open: true
+    volumes:
+      - ./packages/frontend:/var/app/frontend
+
+  backend:
+    depends_on:
+      - db
+    image: node:13
+    working_dir: /var/app/backend
+    environment:
+      - NODE_ENV=development
+    ports:
+      - 4000:4000
+      - 9929:9929
+    command: npm start
+    volumes:
+      - ./packages/backend:/var/app/backend
+      - node_modules:/var/app/backend/node_modules
+
+  notes:
+    depends_on:
+      - db
+    image: etherpad/etherpad:1.8.7
+    ports:
+      - 3001:9001
+    volumes:
+      - ./widgets/notes/settings.json:/opt/etherpad-lite/settings.json
+      - ./widgets/notes/ProjectHubSkin:/opt/etherpad-lite/src/static/skins/ProjectHubSkin
+
+  db:
+    image: mysql:5.7
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --init-file=/data/application/init.sql
+    volumes:
+        - ./db/init.sql:/data/application/init.sql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456789
+      - MYSQL_DATABASE=project_hub
+      - MYSQL_USER=ha1-user
+      - MYSQL_PASSWORD=123456789
+    ports:
+      - '3306:3306'
+
+volumes:
+  node_modules:

@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "string",
+    "public": true,
+    "active": true,
+    "description": "string",
+    "picture": "string",
+    "labels": ["string"],
+    "members": [
+      {
+        "id": 1,
+        "username": "string",
+        "picture": "string",
+        "permission": true,
+        "status": "string"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Demo 2",
+    "public": true,
+    "active": true,
+    "description": "string",
+    "picture": "string",
+    "labels": ["string"],
+    "members": [
+      {
+        "id": 1,
+        "username": "string",
+        "picture": "string",
+        "permission": true,
+        "status": "string"
+      }
+    ]
+  }
+]

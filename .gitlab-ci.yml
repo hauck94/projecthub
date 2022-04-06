@@ -1,0 +1,122 @@
+stages:
+  - test
+  - build
+  - deploy
+
+cache:
+  paths:
+    - packages/frontend/node_modules/
+    - packages/backend/node_modules/
+
+variables:
+  ACCESS_TOKEN_SECRET: "PROJECT_SECRET"
+
+###################################################################################
+#
+#                                     frontend
+#
+###################################################################################
+
+frontend:lint:
+  stage: test
+  image: node:14.7-stretch
+  needs: []
+  script:
+    - npm install --global eslint
+    - cd ./packages/frontend/
+    - npm ci
+    - npm run lint
+
+frontend:test:
+  stage: test
+  image: node:14.7-stretch
+  needs: []
+  artifacts:
+    paths:
+      - packages/frontend/coverage/
+  script:
+    - cd ./packages/frontend/
+    - npm ci
+    - npm run test
+
+frontend:build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  needs: ["frontend:lint","frontend:test"]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context ./packages/frontend/ --dockerfile ./packages/frontend/Dockerfile --destination $CI_REGISTRY_IMAGE/frontend
+  only:
+    refs:
+      - master
+
+
+
+###################################################################################
+#
+#                                       backend
+#
+###################################################################################
+
+backend:lint:
+  stage: test
+  image: node:14.7-stretch
+  needs: []
+  script:
+    - cd ./packages/backend/
+    - npm ci
+    - npm run lint
+
+backend:test:
+  stage: test
+  image: node:14.7-stretch
+  needs: []
+  artifacts:
+    paths:
+      - packages/backend/coverage/
+  script:
+    - cd ./packages/backend/
+    - npm ci
+    - npm run test
+
+backend:build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  needs: ["backend:lint","backend:test"]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context ./packages/backend/ --dockerfile ./packages/backend/Dockerfile --destination $CI_REGISTRY_IMAGE/backend
+  only:
+    refs:
+      - master
+
+###################################################################################
+#
+#                                       deploy
+#
+###################################################################################
+
+deploy:
+  image:
+    name: lachlanevenson/k8s-kubectl:latest
+    entrypoint: ["/bin/sh", "-c"]
+  stage: deploy
+  needs: ["frontend:build","backend:build"]
+  environment:
+    name: $CI_ENVIRONMENT_NAME
+    url: https://project-hub.studio
+    kubernetes:
+      namespace: project-hub
+  script:
+    - kubectl version
+    - kubectl delete -n project-hub all -l ref=project-hub
+    - kubectl apply -k ./deploy/kubernetes/
+  only:
+    refs:
+      - master

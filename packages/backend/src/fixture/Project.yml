@@ -1,0 +1,18 @@
+entity: Project
+items:
+  Pjkt1:
+    name: "Project 1"
+    description: "ProjectsDescription"
+    active: true
+    open: false
+    picture: 'tmpPic'
+    backgroundColor: 'tmpColor'
+  Pjkt2:
+    name: "Project 2"
+    description: "ProjectsDescription22"
+    active: false
+    open: true
+    picture: 'tmpPic'
+    backgroundColor: 'tmpColor'
+
+
